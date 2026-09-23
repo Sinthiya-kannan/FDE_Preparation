@@ -608,6 +608,331 @@ The goal is to isolate whether the problem is caused by:
 * Infrastructure
 
 ---
+# Key User Flow
+
+The overall application flow is:
+
+```text
+Customer Registration
+        |
+        v
+Company Email / Domain Validation
+        |
+        v
+Customer Pending
+        |
+        +----------------+
+        |                |
+        v                v
+    Approved          Rejected
+        |
+        v
+User Creation
+        |
+        v
+Invitation Generated
+        |
+        v
+User Activates Invitation
+        |
+        v
+User Becomes Active
+        |
+        v
+Login
+        |
+        v
+JWT Authentication
+        |
+        v
+Role-Based Authorization
+        |
+        v
+Access Protected APIs
+        |
+        v
+Security Assessment
+        |
+        v
+Gemini AI Analysis
+        |
+        v
+Risk Summary + Recommendations
+        |
+        v
+PostgreSQL
+```
+
+---
+
+# API Endpoints
+
+The application exposes REST APIs for customer management, user management, authentication, invitations, approvals, and AI security analysis.
+
+| Method | Endpoint                  | Purpose                            |
+| ------ | ------------------------- | ---------------------------------- |
+| POST   | `/customers/register`     | Register a customer/company        |
+| POST   | `/users/register`         | Create a user                      |
+| POST   | `/login`                  | Authenticate user and generate JWT |
+| POST   | `/invitations`            | Create user invitation             |
+| POST   | `/invitations/activate`   | Activate invitation                |
+| POST   | `/customers/{id}/approve` | Approve customer                   |
+| POST   | `/customers/{id}/reject`  | Reject customer                    |
+| POST   | `/ai/analyze`             | Generate AI security analysis      |
+| GET    | `/ai/analyses`            | Retrieve previous AI analyses      |
+
+Swagger UI can be used to test and explore the APIs.
+
+---
+
+# Security
+
+Security considerations implemented in the application include:
+
+* JWT Bearer authentication
+* Role-Based Access Control (RBAC)
+* Password hashing
+* Protected API endpoints
+* Invitation token validation
+* Invitation token expiration
+* Company email/domain validation
+* Environment-based secret configuration
+* Separation of authentication and authorization
+
+Authentication verifies the identity of the user, while authorization determines whether the authenticated user has permission to perform a particular operation.
+
+Sensitive values such as database credentials, JWT secrets, and Gemini API keys are not stored in source code.
+
+---
+
+# AI Integration Flow
+
+The AI security analysis feature follows this process:
+
+```text
+Client Request
+      |
+      v
+FastAPI `/ai/analyze`
+      |
+      v
+Validate Request using Pydantic
+      |
+      v
+AI Service
+      |
+      v
+Build Security Analysis Prompt
+      |
+      v
+Gemini API
+      |
+      v
+Structured JSON Response
+      |
+      v
+Pydantic Response Validation
+      |
+      v
+Store Analysis in PostgreSQL
+      |
+      v
+Return Result to Client
+```
+
+The AI service is separated from the API router so that the application can maintain a clean separation between API handling and AI-related business logic.
+
+The stored AI analysis includes:
+
+* Company information
+* Industry
+* Number of employees
+* Security concerns
+* Risk summary
+* Security recommendations
+* Recommendation priority
+* Analysis creation time
+
+---
+
+# Deployment Architecture
+
+The application is designed to run as a multi-container application using Docker Compose.
+
+```text
+                    Client / Browser
+                           |
+                           v
+                    +-------------+
+                    |    Nginx    |
+                    |     :80     |
+                    +-------------+
+                           |
+                           v
+                    +-------------+
+                    |   FastAPI   |
+                    |    :8000    |
+                    +-------------+
+                       /       \
+                      /         \
+                     v           v
+              +-----------+   +-----------+
+              | PostgreSQL|   | Gemini AI |
+              |   :5432   |   |   API     |
+              +-----------+   +-----------+
+```
+
+Docker Compose manages the application containers and their communication.
+
+The PostgreSQL container provides persistent database storage through a Docker volume.
+
+Nginx acts as the public entry point and forwards requests to the FastAPI container.
+
+---
+
+# Testing and CI/CD Flow
+
+The project uses Pytest for automated testing and GitHub Actions for CI/CD.
+
+```text
+Developer
+    |
+    v
+Git Push
+    |
+    v
+GitHub Repository
+    |
+    v
+GitHub Actions
+    |
+    +----> Install Dependencies
+    |
+    +----> Start PostgreSQL
+    |
+    +----> Run Pytest
+    |
+    +----> Build Docker Image
+    |
+    +----> Push Docker Image
+    |
+    v
+Docker Image
+```
+
+This provides an automated process for validating code changes and publishing the Docker image.
+
+---
+
+# Production Troubleshooting Scenarios
+
+The project also focuses on practical production troubleshooting.
+
+### API returns 401
+
+Check:
+
+```text
+JWT token
+    |
+    v
+Token presence
+    |
+    v
+Token validity
+    |
+    v
+Authentication
+```
+
+A `401 Unauthorized` response generally indicates that authentication is missing or invalid.
+
+### API returns 403
+
+Check:
+
+```text
+Authenticated User
+        |
+        v
+User Role
+        |
+        v
+Required Permission
+```
+
+A `403 Forbidden` response indicates that the user is authenticated but does not have the required permission.
+
+### API returns 500
+
+Check:
+
+```text
+API Status
+    |
+    v
+Application Logs
+    |
+    v
+Python / Import Errors
+    |
+    v
+Database Connectivity
+    |
+    v
+Environment Variables
+    |
+    v
+Docker Container
+    |
+    v
+External API
+```
+
+### API is slow
+
+Possible areas to investigate:
+
+* Application logs
+* Database query performance
+* Unnecessary database fields being retrieved
+* Number of database queries
+* External API response time
+* Gemini API response time
+* Nginx configuration
+* Container resource usage
+
+The goal is to identify the actual bottleneck before making changes.
+
+---
+
+# FDE Skills Demonstrated
+
+This project demonstrates practical skills relevant to a Forward Deployed Engineer role:
+
+* Client requirement analysis
+* REST API development
+* FastAPI backend development
+* PostgreSQL database design
+* SQLAlchemy ORM
+* Authentication and JWT
+* Role-Based Access Control
+* API security
+* User and customer workflows
+* Third-party API integration
+* Gemini AI / LLM integration
+* Docker containerization
+* Docker Compose
+* Nginx reverse proxy
+* Git and GitHub
+* GitHub Actions CI/CD
+* Automated testing with Pytest
+* Production troubleshooting
+* Performance troubleshooting
+* Environment and secret management
+* Deployment and operational thinking
+* Debugging across application, database, container, and external services
+
 
 # FDE Learning Goals
 
