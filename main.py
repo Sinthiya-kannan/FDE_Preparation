@@ -6,6 +6,7 @@ from routers.invitation import router as invitation_router
 from routers.activation import router as activation_router
 from routers.approval import router as approval_router
 from routers.rejection import router as rejection_router
+from routers.ai_router import router as ai_router
 
 
 app = FastAPI()
@@ -29,3 +30,4 @@ app.include_router(invitation_router)
 app.include_router(activation_router)
 app.include_router(approval_router)
 app.include_router(rejection_router)
+app.include_router(ai_router)

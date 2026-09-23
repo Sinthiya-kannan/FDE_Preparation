@@ -4,6 +4,7 @@ from database.connection import engine
 from models.customer import Customer
 from models.user import User
 from models.invitation import Invitation
+from models.ai_analysis import AIAnalysis
 
 
 def init_db():
