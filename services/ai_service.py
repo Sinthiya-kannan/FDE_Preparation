@@ -12,10 +12,10 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if not GEMINI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY is not configured")
+client = None
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+if GEMINI_API_KEY:
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 def generate_ai_analysis(
@@ -24,6 +24,7 @@ def generate_ai_analysis(
     employees,
     security_concerns
 ):
+   
     prompt = f"""
     Analyze the following company security information.
 
@@ -57,8 +58,11 @@ def generate_ai_analysis(
     """
 
     try:
+        if client is None:
+            raise RuntimeError("GEMINI_API_KEY is not configured")
+        
         response = client.models.generate_content(
-            model="gemini-3.7-flash",
+            model="gemini-3.5-flash",
             contents=prompt
         )
 
